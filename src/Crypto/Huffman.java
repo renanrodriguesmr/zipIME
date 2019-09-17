@@ -8,6 +8,8 @@ import java.util.Set;
 public class Huffman {
     private String pathToOriginalFile;
     private String pathToHuffmanFile;
+    private HashMap<Character, String> huffmanMap = new HashMap<>();
+    private HuffmanNode huffmanTree;
 
     public Huffman(String pathToOriginalFile, String pathToHuffmanFile){
         this.pathToOriginalFile = pathToOriginalFile;
@@ -23,15 +25,16 @@ public class Huffman {
             }
             HashMap<Character, Integer> freq_map = this.getCharFrequenciesMap(cripto_file);
             assert freq_map != null;
-            HuffmanNode huffman_tree = this.buildTree(freq_map);
-            HashMap<Character, String> huffman_map = this.getHuffmanMap(huffman_tree, new HashMap<>(), new StringBuilder());
+            System.out.println("O mapa de frequência é:\n" + freq_map.toString() + "\n\n");
+            this.huffmanTree = this.buildTree(freq_map);
+            this.getHuffmanMap(this.huffmanTree, new StringBuilder());
             //escrever no novo arquivo
             File huffman_file = new File(this.pathToHuffmanFile);
             if (huffman_file.exists()){
                 huffman_file.delete();
             }
             huffman_file.createNewFile();
-            writeNewFile(cripto_file, huffman_file, huffman_map);
+            writeNewFile(cripto_file, huffman_file, this.huffmanMap);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -47,7 +50,6 @@ public class Huffman {
                 int oldValue = freq_map.getOrDefault((char) i, 0);
                 freq_map.put((char) i, oldValue + 1);
             }
-            System.out.println(freq_map.toString());
             return freq_map;
         } catch (IOException e) {
             e.printStackTrace();
@@ -93,24 +95,21 @@ public class Huffman {
         return priorityQueue.poll();
     }
 
-    private HashMap<Character, String> getHuffmanMap(HuffmanNode node, HashMap<Character, String> huffman_map, StringBuilder prefix) {
+    private void getHuffmanMap(HuffmanNode node, StringBuilder prefix) {
         if (node != null) {
             if (node.left == null && node.right == null) {
-                huffman_map.put(node.data, prefix.toString());
+                this.huffmanMap.put(node.data, prefix.toString());
 
             } else {
                 prefix.append('0');
-                huffman_map = getHuffmanMap(node.left, huffman_map, prefix);
+                getHuffmanMap(node.left, prefix);
                 prefix.deleteCharAt(prefix.length() - 1);
 
                 prefix.append('1');
-                huffman_map = getHuffmanMap(node.right, huffman_map, prefix);
+                getHuffmanMap(node.right, prefix);
                 prefix.deleteCharAt(prefix.length() - 1);
             }
         }
-
-        return huffman_map;
-
     }
 
     private void writeNewFile (File criptoFile, File huffmanFile, HashMap<Character, String> huffmanMap){
@@ -119,12 +118,46 @@ public class Huffman {
             FileWriter fw = new FileWriter(huffmanFile, true);
             int i;
             while((i=fr.read()) != -1){
-                System.out.println(huffmanMap.get((char) i));
                 fw.append(huffmanMap.get((char) i));
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public String decompressHuffman(){
+        try {
+            StringBuilder stringBuilder = new StringBuilder();
+            HuffmanNode temp = this.huffmanTree;
+            File huffman_file = new File(this.pathToHuffmanFile);
+            if (!huffman_file.exists()) {
+                throw new FileNotFoundException();
+            }
+            FileReader fr = new FileReader(huffman_file);
+            int i;
+            while((i=fr.read()) != -1){
+                int j = Integer.parseInt(String.valueOf((char) i));
+                if (j == 0) {
+                    temp = temp.left;
+                    if (temp.left == null && temp.right == null) {
+                        stringBuilder.append(temp.data);
+                        temp = this.huffmanTree;
+                    }
+                }
+                if (j == 1) {
+                    temp = temp.right;
+                    if (temp.left == null && temp.right == null) {
+                        stringBuilder.append(temp.data);
+                        temp = this.huffmanTree;
+                    }
+                }
+            }
+            return stringBuilder.toString();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 }
 

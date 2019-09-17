@@ -1,0 +1,1 @@
+Esse é um programa que implementa a criptografia de César, além do algoritmo de compressão de Huffman.

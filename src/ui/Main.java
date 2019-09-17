@@ -13,6 +13,7 @@ public class Main {
         String pathToCriptoFile = "./cripto.txt";
         String pathToCompressedFile = "./compressed.txt";
 
+        // Criptografar e compactar
         System.out.println("Entre com o shift da criptografia de C\u00e9sar:\n");
         Scanner sc = new Scanner(System.in);
         int cesarShift = sc.nextInt();
@@ -20,5 +21,10 @@ public class Main {
         cf.CesarCripto();
         Huffman hf = new Huffman(pathToCriptoFile, pathToCompressedFile);
         hf.compressHuffman();
+
+        // Decriptografia e análise
+        String message_cripto = hf.decompressHuffman();
+        String message_original = cf.CesarReverse(message_cripto);
+        System.out.println("A chave original:\n" + message_original);
     }
 }

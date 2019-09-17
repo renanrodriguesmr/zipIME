@@ -47,6 +47,14 @@ public class Cesar {
         }
     }
 
+    public String CesarReverse (String message) {
+        char[] messageArray = message.toCharArray();
+        for (int i = 0; i < messageArray.length; i++){
+            messageArray[i] = this.CesarCriptoCharReverse(messageArray[i]);
+        }
+        return new String(messageArray);
+    }
+
     private char CesarCriptoChar(int c){
         // Retorna o caractere cifrado
         if (c < 65 || (c > 90 && c < 97) || c > 122) {
@@ -58,5 +66,18 @@ public class Cesar {
         }
 
         return (char) (((c-97)%25)+97 + this.CesarShift);
+    }
+
+    private char CesarCriptoCharReverse(int c){
+        // Retorna o caractere cifrado
+        if (c < 65 || (c > 90 && c < 97) || c > 122) {
+            return (char) c;
+        }
+
+        if (c < 91){
+            return (char) (((c-65)%25)+65 - this.CesarShift);
+        }
+
+        return (char) (((c-97)%25)+97 - this.CesarShift);
     }
 }
